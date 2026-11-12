@@ -101,13 +101,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e4eba85ea1d0a966a983acd07deee566e67395d2d96b6fb39e62b5a833f1eb0b"
 
 [[package]]
-name = "hello"
-version = "0.1.0"
-dependencies = [
- "sola-raylib",
-]
-
-[[package]]
 name = "itertools"
 version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -291,6 +284,13 @@ dependencies = [
  "proc-macro2",
  "quote",
  "unicode-ident",
+]
+
+[[package]]
+name = "tetray_rust"
+version = "0.1.0"
+dependencies = [
+ "sola-raylib",
 ]
 
 [[package]]
