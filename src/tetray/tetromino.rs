@@ -112,8 +112,8 @@ pub enum Rotate {
     Half,
 }
 
-#[derive(Clone, Copy)]
-pub enum Shape { J, L, S, T, Z, I, O }
+#[derive(Clone, Copy, PartialEq)]
+pub enum Shape { None, J, L, S, T, Z, I, O }
 
 pub struct Matrix5x5 {
     shape: [[bool; SIZE]; SIZE]
