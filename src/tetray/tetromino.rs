@@ -7,7 +7,7 @@ pub const ROTATED_COUNT: usize = 4;
 pub const SIZE: usize = 5;
 
 pub const MINO_J: &Tetromino = &Tetromino::new(
-    Shape::J,
+    MinoKind::J,
     Color::new(60, 120, 255, 255),
     Matrix5x5 {
         shape: [
@@ -21,7 +21,7 @@ pub const MINO_J: &Tetromino = &Tetromino::new(
 );
 
 pub const MINO_L: &Tetromino = &Tetromino::new(
-    Shape::L,
+    MinoKind::L,
     Color::new(255, 150, 30, 255),
     Matrix5x5 {
         shape: [
@@ -35,7 +35,7 @@ pub const MINO_L: &Tetromino = &Tetromino::new(
 );
 
 pub const MINO_S: &Tetromino = &Tetromino::new(
-    Shape::S,
+    MinoKind::S,
     Color::new(60, 230, 80, 255),
     Matrix5x5 {
         shape: [
@@ -49,7 +49,7 @@ pub const MINO_S: &Tetromino = &Tetromino::new(
 );
 
 pub const MINO_T: &Tetromino = &Tetromino::new(
-    Shape::T,
+    MinoKind::T,
     Color::new(190, 80, 255, 255),
     Matrix5x5 {
         shape: [
@@ -63,7 +63,7 @@ pub const MINO_T: &Tetromino = &Tetromino::new(
 );
 
 pub const MINO_Z: &Tetromino = &Tetromino::new(
-    Shape::Z,
+    MinoKind::Z,
     Color::new(255, 60, 60, 255),
     Matrix5x5 {
         shape: [
@@ -77,7 +77,7 @@ pub const MINO_Z: &Tetromino = &Tetromino::new(
 );
 
 pub const MINO_I: &Tetromino = &Tetromino::new(
-    Shape::I,
+    MinoKind::I,
     Color::new(0, 240, 240, 255),
     Matrix5x5 {
         shape: [
@@ -91,7 +91,7 @@ pub const MINO_I: &Tetromino = &Tetromino::new(
 );
 
 pub const MINO_O: &Tetromino = &Tetromino::new(
-    Shape::O,
+    MinoKind::O,
     Color::new(255, 220, 0, 255),
     Matrix5x5 {
         shape: [
@@ -113,14 +113,14 @@ pub enum Rotate {
 }
 
 #[derive(Clone, Copy, PartialEq)]
-pub enum Shape { None, J, L, S, T, Z, I, O }
+pub enum MinoKind { None, J, L, S, T, Z, I, O }
 
 pub struct Matrix5x5 {
     shape: [[bool; SIZE]; SIZE]
 }
 
 pub struct Tetromino {
-    shape: Shape,
+    mino_kind: MinoKind,
     color: Color,
     rotated_shape: [Matrix5x5; ROTATED_COUNT]
 }
@@ -132,7 +132,7 @@ impl Matrix5x5 {
 }
 
 impl Tetromino {
-    const fn new(shape: Shape, color: Color, raw_shape: Matrix5x5) -> Self {
+    const fn new(mino_kind: MinoKind, color: Color, raw_shape: Matrix5x5) -> Self {
         let mut left = [[false; SIZE]; SIZE];
         let mut right = [[false; SIZE]; SIZE];
         let mut half = [[false; SIZE]; SIZE];
@@ -153,7 +153,7 @@ impl Tetromino {
         }
 
         Self {
-            shape: shape,
+            mino_kind,
             color: color,
             rotated_shape: [
                 Matrix5x5 { shape: left },
@@ -164,8 +164,8 @@ impl Tetromino {
         }
     }
 
-    pub fn get_shape(&self) -> Shape {
-        self.shape
+    pub fn get_mino_kind(&self) -> MinoKind {
+        self.mino_kind
     }
 
     pub fn get_color(&self) -> Color {
