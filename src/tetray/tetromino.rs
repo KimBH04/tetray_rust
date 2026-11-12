@@ -126,12 +126,8 @@ pub struct Tetromino {
 }
 
 impl Matrix5x5 {
-    pub fn get_cell(&self, r: usize, c: usize) -> Option<bool> {
-        if r >= SIZE || c >= SIZE {
-            None
-        } else {
-            Some(self.shape[r][c])
-        }
+    pub fn get_cell(&self, r: usize, c: usize) -> bool {
+        r < SIZE && c < SIZE && self.shape[r][c]
     }
 }
 

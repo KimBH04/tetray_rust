@@ -27,9 +27,10 @@ fn main() {
                 let x = c as i32 * 40;
                 let y = r as i32 * 40;
                 let color = |m: &Tetromino| {
-                    match m.get_rotated_shape(rotates[rotate]).get_cell(r, c) {
-                        Some(true) => m.get_color(),
-                        _ => Color::BLACK,
+                    if m.get_rotated_shape(rotates[rotate]).get_cell(r, c) {
+                        m.get_color()
+                    } else {
+                        Color::BLACK
                     }
                 };
 
