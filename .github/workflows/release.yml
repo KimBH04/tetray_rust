@@ -1,0 +1,135 @@
+name: Release
+
+# - v로 시작하는 태그(예: v0.1.0)를 푸시하면 각 OS에서 릴리즈 빌드 후 GitHub Release에 업로드
+# - Actions 탭에서 수동 실행(Run workflow)도 가능
+#   - tag를 비워두면: 빌드만 하고 결과물은 워크플로 실행 페이지의 Artifacts로 받음
+#   - tag를 입력하면: 빌드 후 해당 태그로 GitHub Release까지 생성
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "릴리즈 태그 (예: v0.1.0). 비워두면 빌드만 하고 릴리즈는 만들지 않음"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+  # Cargo.toml의 패키지 이름(= 빌드되는 실행 파일 이름)
+  BIN_NAME: tetray_rust
+  # 배포 파일에 붙일 이름
+  APP_NAME: tetray
+  # 배포 파일 이름에 들어갈 버전
+  # 태그 푸시: 태그 이름 / 수동 실행: 입력한 tag, 없으면 build-<실행 번호>
+  VERSION: ${{ github.event_name == 'workflow_dispatch' && (inputs.tag || format('build-{0}', github.run_number)) || github.ref_name }}
+
+jobs:
+  build:
+    name: Build (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # x86_64
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            archive: zip
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            archive: tar.gz
+          - os: macos-15-intel
+            target: x86_64-apple-darwin
+            archive: tar.gz
+          # ARM64 (네이티브 ARM 러너에서 빌드)
+          - os: windows-11-arm
+            target: aarch64-pc-windows-msvc
+            archive: zip
+          - os: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-gnu
+            archive: tar.gz
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            archive: tar.gz
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake libclang-dev \
+            libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev \
+            libgl1-mesa-dev libasound2-dev
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+
+      - name: Build release
+        run: cargo build --release --locked --target ${{ matrix.target }}
+
+      - name: Package (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $name = "${{ env.APP_NAME }}-${{ env.VERSION }}-${{ matrix.target }}"
+          New-Item -ItemType Directory -Path "dist/$name" | Out-Null
+          Copy-Item "target/${{ matrix.target }}/release/${{ env.BIN_NAME }}.exe" "dist/$name/${{ env.APP_NAME }}.exe"
+          Copy-Item README.md, LICENSE "dist/$name/"
+          Compress-Archive -Path "dist/$name" -DestinationPath "dist/$name.zip"
+          "ASSET=dist/$name.zip" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Package (Linux / macOS)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          name="${APP_NAME}-${VERSION}-${{ matrix.target }}"
+          mkdir -p "dist/$name"
+          cp "target/${{ matrix.target }}/release/${BIN_NAME}" "dist/$name/${APP_NAME}"
+          cp README.md LICENSE "dist/$name/"
+          tar -czf "dist/$name.tar.gz" -C dist "$name"
+          echo "ASSET=dist/$name.tar.gz" >> "$GITHUB_ENV"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.APP_NAME }}-${{ env.VERSION }}-${{ matrix.target }}
+          path: ${{ env.ASSET }}
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    needs: build
+    # 태그 푸시이거나, 수동 실행에서 tag를 입력한 경우에만 릴리즈 생성
+    if: github.event_name == 'push' || inputs.tag != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Create release and upload assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.VERSION }}
+          # 수동 실행으로 새 태그를 만들 때 실행한 커밋에 태그를 붙임
+          target_commitish: ${{ github.sha }}
+          files: dist/*
+          generate_release_notes: true
