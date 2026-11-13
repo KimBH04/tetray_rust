@@ -5,6 +5,7 @@ const O: bool = true;
 
 pub const ROTATED_COUNT: usize = 4;
 pub const SIZE: usize = 5;
+pub const MINO_COUNT: usize = 7;
 
 pub const MINO_J: &Tetromino = &Tetromino::new(
     MinoKind::J,
