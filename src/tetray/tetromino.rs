@@ -7,6 +7,12 @@ pub const ROTATED_COUNT: usize = 4;
 pub const SIZE: usize = 5;
 pub const MINO_COUNT: usize = 7;
 
+pub const MINO_NONE: &Tetromino = &Tetromino::new(
+    MinoKind::None,
+    Color::new(0, 0, 0, 0),
+    Matrix5x5 { shape: [[X; SIZE]; SIZE] }
+);
+
 pub const MINO_J: &Tetromino = &Tetromino::new(
     MinoKind::J,
     Color::new(60, 120, 255, 255),
@@ -162,6 +168,19 @@ impl Tetromino {
                 Matrix5x5 { shape: right },
                 Matrix5x5 { shape: half }
             ]
+        }
+    }
+
+    pub const fn get_mino(kind: MinoKind) -> &'static Tetromino {
+        match kind {
+            MinoKind::None => MINO_NONE,
+            MinoKind::J => MINO_J,
+            MinoKind::L => MINO_L,
+            MinoKind::S => MINO_S,
+            MinoKind::T => MINO_T,
+            MinoKind::Z => MINO_Z,
+            MinoKind::I => MINO_I,
+            MinoKind::O => MINO_O,
         }
     }
 

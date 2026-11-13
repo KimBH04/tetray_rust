@@ -5,9 +5,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use sola_raylib::{color::Color, drawing::RaylibDraw};
 
 use crate::tetray::bag::{Bag, CASE_COUNT};
-use crate::tetray::tetromino::{
-    MINO_I, MINO_J, MINO_L, MINO_O, MINO_S, MINO_T, MINO_Z, MinoKind, Rotate, SIZE, Tetromino,
-};
+use crate::tetray::tetromino::{Rotate, SIZE, Tetromino};
 
 const CELL: i32 = 20;
 const GAP: i32 = 10;
@@ -23,19 +21,6 @@ fn time_random() -> u64 {
     x ^= x >> 7;
     x ^= x << 17;
     x
-}
-
-fn mino_of(kind: MinoKind) -> Option<&'static Tetromino> {
-    match kind {
-        MinoKind::J => Some(MINO_J),
-        MinoKind::L => Some(MINO_L),
-        MinoKind::S => Some(MINO_S),
-        MinoKind::T => Some(MINO_T),
-        MinoKind::Z => Some(MINO_Z),
-        MinoKind::I => Some(MINO_I),
-        MinoKind::O => Some(MINO_O),
-        MinoKind::None => None,
-    }
 }
 
 fn main() {
@@ -62,14 +47,13 @@ fn main() {
         let base_y = 200;
         for (i, kind) in minos.iter().enumerate() {
             let base_x = GAP + i as i32 * (SIZE as i32 * CELL + GAP);
-            let mino = mino_of(*kind);
+            let mino = Tetromino::get_mino(*kind);
             for r in 0..SIZE {
                 for c in 0..SIZE {
-                    let color = match mino {
-                        Some(m) if m.get_rotated_shape(Rotate::Straight).get_cell(r, c) => {
-                            m.get_color()
-                        }
-                        _ => Color::BLACK,
+                    let color = if mino.get_rotated_shape(Rotate::Straight).get_cell(r, c) {
+                        mino.get_color()
+                    } else {
+                        Color::BLACK
                     };
                     d.draw_rectangle(
                         base_x + c as i32 * CELL,
