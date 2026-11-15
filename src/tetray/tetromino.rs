@@ -113,10 +113,10 @@ pub const MINO_O: &Tetromino = &Tetromino::new(
 
 #[derive(Clone, Copy)]
 pub enum Rotate {
-    Left,
-    Straight,
-    Right,
-    Half,
+    Left = 0,
+    Straight = 1,
+    Right = 2,
+    Half = 3,
 }
 
 #[derive(Clone, Copy, PartialEq)]
