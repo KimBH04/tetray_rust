@@ -7,13 +7,13 @@ pub const ROTATED_COUNT: usize = 4;
 pub const SIZE: usize = 5;
 pub const MINO_COUNT: usize = 7;
 
-pub const MINO_NONE: &Tetromino = &Tetromino::new(
+pub const MINO_NONE: Tetromino = Tetromino::new(
     MinoKind::None,
     Color::new(0, 0, 0, 0),
     Matrix5x5 { shape: [[X; SIZE]; SIZE] }
 );
 
-pub const MINO_J: &Tetromino = &Tetromino::new(
+pub const MINO_J: Tetromino = Tetromino::new(
     MinoKind::J,
     Color::new(60, 120, 255, 255),
     Matrix5x5 {
@@ -27,7 +27,7 @@ pub const MINO_J: &Tetromino = &Tetromino::new(
     }
 );
 
-pub const MINO_L: &Tetromino = &Tetromino::new(
+pub const MINO_L: Tetromino = Tetromino::new(
     MinoKind::L,
     Color::new(255, 150, 30, 255),
     Matrix5x5 {
@@ -41,7 +41,7 @@ pub const MINO_L: &Tetromino = &Tetromino::new(
     }
 );
 
-pub const MINO_S: &Tetromino = &Tetromino::new(
+pub const MINO_S: Tetromino = Tetromino::new(
     MinoKind::S,
     Color::new(60, 230, 80, 255),
     Matrix5x5 {
@@ -55,7 +55,7 @@ pub const MINO_S: &Tetromino = &Tetromino::new(
     }
 );
 
-pub const MINO_T: &Tetromino = &Tetromino::new(
+pub const MINO_T: Tetromino = Tetromino::new(
     MinoKind::T,
     Color::new(190, 80, 255, 255),
     Matrix5x5 {
@@ -69,7 +69,7 @@ pub const MINO_T: &Tetromino = &Tetromino::new(
     }
 );
 
-pub const MINO_Z: &Tetromino = &Tetromino::new(
+pub const MINO_Z: Tetromino = Tetromino::new(
     MinoKind::Z,
     Color::new(255, 60, 60, 255),
     Matrix5x5 {
@@ -83,7 +83,7 @@ pub const MINO_Z: &Tetromino = &Tetromino::new(
     }
 );
 
-pub const MINO_I: &Tetromino = &Tetromino::new(
+pub const MINO_I: Tetromino = Tetromino::new(
     MinoKind::I,
     Color::new(0, 240, 240, 255),
     Matrix5x5 {
@@ -97,7 +97,7 @@ pub const MINO_I: &Tetromino = &Tetromino::new(
     }
 );
 
-pub const MINO_O: &Tetromino = &Tetromino::new(
+pub const MINO_O: Tetromino = Tetromino::new(
     MinoKind::O,
     Color::new(255, 220, 0, 255),
     Matrix5x5 {
@@ -171,7 +171,7 @@ impl Tetromino {
         }
     }
 
-    pub const fn get_mino(kind: MinoKind) -> &'static Tetromino {
+    pub const fn get_mino(kind: MinoKind) -> Tetromino {
         match kind {
             MinoKind::None => MINO_NONE,
             MinoKind::J => MINO_J,
