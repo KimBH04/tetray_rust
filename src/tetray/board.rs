@@ -20,22 +20,22 @@ impl Board {
         }
     }
 
-    pub fn collision_check(&self, r: i32, c: i32, shape: Matrix5x5) -> bool {
+    pub fn collision(&self, r: i32, c: i32, shape: &Matrix5x5) -> bool {
         for shape_r in 0..SIZE {
             for shape_c in 0..SIZE {
                 if !shape.get_cell(shape_r, shape_c) {
                     continue;
                 }
 
-                let current_r = r as usize + shape_r;
-                let current_c = c as usize + shape_c;
-                if current_r >= BOARD_DEPTH || current_c >= BOARD_WIDTH || self.cells[current_r][current_c] != MinoKind::None {
-                    return false;
+                let cell_r = (shape_r as i32 + r) as usize;
+                let cell_c = (shape_c as i32 + c) as usize;
+                if cell_r >= BOARD_DEPTH || cell_c >= BOARD_WIDTH || self.cells[cell_r][cell_c] != MinoKind::None {
+                    return true
                 }
             }
         }
 
-        true
+        false
     }
 
     /// 채워진 줄을 지우고 차례대로 아래로 내립니다.\
