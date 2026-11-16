@@ -4,23 +4,34 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use sola_raylib::{color::Color, drawing::RaylibDraw};
 
-use crate::tetray::bag::{Bag, CASE_COUNT};
-use crate::tetray::tetromino::{Rotate, SIZE, Tetromino};
+use crate::tetray::board::{BOARD_DEPTH, BOARD_WIDTH};
+use crate::tetray::game::Game;
 
-const CELL: i32 = 20;
-const GAP: i32 = 10;
+// 화면에 그릴 행 수 (보드 하단 기준, 스폰 영역 포함)
+const VISIBLE_ROWS: usize = 22;
+const CELL_SIZE: i32 = 24;
+const BOARD_X: i32 = 280;
+const BOARD_Y: i32 = 30;
 
-/// 현재 유닉스 시간(나노초)을 시드로 하는 xorshift64 의사 난수
-fn time_random() -> u64 {
-    let nanos = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .map(|d| d.as_nanos() as u64)
-        .unwrap_or(0);
-    let mut x = nanos | 1;
-    x ^= x << 13;
-    x ^= x >> 7;
-    x ^= x << 17;
-    x
+fn draw_board(d: &mut impl RaylibDraw, game: &Game) {
+    let first_row = BOARD_DEPTH - VISIBLE_ROWS;
+    for r in first_row..BOARD_DEPTH {
+        for c in 0..BOARD_WIDTH {
+            let x = BOARD_X + c as i32 * CELL_SIZE;
+            let y = BOARD_Y + (r - first_row) as i32 * CELL_SIZE;
+            if let Some(color) = game.get_cell_color(r, c) {
+                d.draw_rectangle(x, y, CELL_SIZE, CELL_SIZE, color);
+            }
+            d.draw_rectangle_lines(x, y, CELL_SIZE, CELL_SIZE, Color::LIGHTGRAY);
+        }
+    }
+    d.draw_rectangle_lines(
+        BOARD_X - 1,
+        BOARD_Y - 1,
+        BOARD_WIDTH as i32 * CELL_SIZE + 2,
+        VISIBLE_ROWS as i32 * CELL_SIZE + 2,
+        Color::DARKGRAY,
+    );
 }
 
 fn main() {
@@ -29,45 +40,20 @@ fn main() {
         .title("Tetray")
         .build();
 
-    // 1초마다 갱신
-    win.set_target_fps(1);
+    let seed = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| d.as_nanos() as u64)
+        .unwrap_or(0);
+
+    let mut game = Game::new(seed as usize);
+
+    win.set_target_fps(10);
 
     while !win.window_should_close() {
-        let nth = (time_random() % CASE_COUNT as u64) as usize;
-        let mut bag = Bag::new(nth).expect("nth out of range");
-
-        let mut minos = Vec::new();
-        while let Some(kind) = bag.get_next() {
-            minos.push(kind);
-        }
+        game.update();
 
         let mut d = win.begin_drawing(&thread);
         d.clear_background(Color::RAYWHITE);
-
-        let base_y = 200;
-        for (i, kind) in minos.iter().enumerate() {
-            let base_x = GAP + i as i32 * (SIZE as i32 * CELL + GAP);
-            let mino = Tetromino::get_mino(*kind);
-            for r in 0..SIZE {
-                for c in 0..SIZE {
-                    let color = if mino.get_rotated_shape(Rotate::Straight).get_cell(r, c) {
-                        mino.get_color()
-                    } else {
-                        Color::BLACK
-                    };
-                    d.draw_rectangle(
-                        base_x + c as i32 * CELL,
-                        base_y + r as i32 * CELL,
-                        CELL,
-                        CELL,
-                        color,
-                    );
-                }
-            }
-        }
-
-        let text = format!("Permutation #{} / {}", nth, CASE_COUNT);
-        let text_y = base_y + SIZE as i32 * CELL + 20;
-        d.draw_text(&text, GAP, text_y, 30, Color::DARKGRAY);
+        draw_board(&mut d, &game);
     }
 }
