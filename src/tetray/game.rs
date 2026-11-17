@@ -128,19 +128,26 @@ impl Game {
     }
 
     pub fn update(&mut self) {
+        self.drop_mino();
+    }
+
+    fn drop_mino(&mut self) {
         let rt = &mut self.runtime_mino;
         let shape = rt.mino.get_rotated_shape(rt.rotated);
         if self.board.collision(rt.r + 1, rt.c, shape) {
             self.board.place(rt.r, rt.c, shape, rt.mino.get_mino_kind());
-            self.board.update_board();
-            self.runtime_mino = RuntimeTetromino::new(
-                SPAWN_POINT.0,
-                SPAWN_POINT.1,
-                MinoKind::get_mino(self.mino_queue.get_next())
-            );
+            self.pick_mino();
         } else {
             rt.move_vertical(1);
         }
+    }
+
+    fn pick_mino(&mut self) {
+        self.runtime_mino = RuntimeTetromino::new(
+            SPAWN_POINT.0,
+            SPAWN_POINT.1,
+            MinoKind::get_mino(self.mino_queue.get_next())
+        );
     }
 
     pub fn get_cell_color(&self, r: usize, c: usize) -> Option<Color> {
