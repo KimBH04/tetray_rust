@@ -4,13 +4,13 @@ const X: bool = false;
 const O: bool = true;
 
 pub const ROTATED_COUNT: usize = 4;
-pub const SIZE: usize = 5;
+pub const MINO_SIZE: usize = 5;
 pub const MINO_COUNT: usize = 7;
 
 pub const MINO_NONE: Tetromino = Tetromino::new(
     MinoKind::None,
     Color::new(0, 0, 0, 0),
-    Matrix5x5 { shape: [[X; SIZE]; SIZE] }
+    Matrix5x5 { shape: [[X; MINO_SIZE]; MINO_SIZE] }
 );
 
 pub const MINO_J: Tetromino = Tetromino::new(
@@ -123,7 +123,7 @@ pub enum Rotate {
 pub enum MinoKind { None, J, L, S, T, Z, I, O }
 
 pub struct Matrix5x5 {
-    shape: [[bool; SIZE]; SIZE]
+    shape: [[bool; MINO_SIZE]; MINO_SIZE]
 }
 
 pub struct Tetromino {
@@ -134,7 +134,7 @@ pub struct Tetromino {
 
 impl Matrix5x5 {
     pub fn get_cell(&self, r: usize, c: usize) -> bool {
-        r < SIZE && c < SIZE && self.shape[r][c]
+        r < MINO_SIZE && c < MINO_SIZE && self.shape[r][c]
     }
 }
 
@@ -168,18 +168,18 @@ impl MinoKind {
 
 impl Tetromino {
     const fn new(mino_kind: MinoKind, color: Color, raw_shape: Matrix5x5) -> Self {
-        let mut left = [[false; SIZE]; SIZE];
-        let mut right = [[false; SIZE]; SIZE];
-        let mut half = [[false; SIZE]; SIZE];
+        let mut left = [[false; MINO_SIZE]; MINO_SIZE];
+        let mut right = [[false; MINO_SIZE]; MINO_SIZE];
+        let mut half = [[false; MINO_SIZE]; MINO_SIZE];
 
         let mut r = 0;
         let mut c = 0;
-        while r < SIZE {
-            while c < SIZE {
+        while r < MINO_SIZE {
+            while c < MINO_SIZE {
                 let raw_cell = raw_shape.shape[r][c];
-                left[SIZE - (c + 1)][r] = raw_cell;
-                right[c][SIZE - (r + 1)] = raw_cell;
-                half[SIZE - (r + 1)][SIZE - (c + 1)] = raw_cell;
+                left[MINO_SIZE - (c + 1)][r] = raw_cell;
+                right[c][MINO_SIZE - (r + 1)] = raw_cell;
+                half[MINO_SIZE - (r + 1)][MINO_SIZE - (c + 1)] = raw_cell;
 
                 c += 1;
             }

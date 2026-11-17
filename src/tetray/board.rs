@@ -1,4 +1,4 @@
-use crate::tetray::tetromino::{Matrix5x5, SIZE, MinoKind};
+use crate::tetray::tetromino::{Matrix5x5, MINO_SIZE, MinoKind};
 
 pub const BOARD_DEPTH: usize = 40;
 pub const BOARD_WIDTH: usize = 10;
@@ -21,8 +21,8 @@ impl Board {
     }
 
     pub fn collision(&self, r: i32, c: i32, shape: &Matrix5x5) -> bool {
-        for shape_r in 0..SIZE {
-            for shape_c in 0..SIZE {
+        for shape_r in 0..MINO_SIZE {
+            for shape_c in 0..MINO_SIZE {
                 if !shape.get_cell(shape_r, shape_c) {
                     continue;
                 }
@@ -39,8 +39,8 @@ impl Board {
     }
 
     pub fn place(&mut self, r: i32, c: i32, shape: &Matrix5x5, kind: MinoKind) {
-        for shape_r in 0..SIZE {
-            for shape_c in 0..SIZE {
+        for shape_r in 0..MINO_SIZE {
+            for shape_c in 0..MINO_SIZE {
                 if !shape.get_cell(shape_r, shape_c) {
                     continue;
                 }

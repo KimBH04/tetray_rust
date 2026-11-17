@@ -1,6 +1,6 @@
 use sola_raylib::color::Color;
 
-use crate::tetray::{bag::{Bag, CASE_COUNT}, board::{BOARD_DEPTH, BOARD_WIDTH, Board}, tetromino::{MinoKind, Rotate, SIZE, Tetromino}};
+use crate::tetray::{bag::{Bag, CASE_COUNT}, board::{BOARD_DEPTH, BOARD_WIDTH, Board}, tetromino::{MinoKind, Rotate, MINO_SIZE, Tetromino}};
 
 const NEXT_PREVIEW_COUNT: usize = 5;
 
@@ -141,7 +141,7 @@ impl Game {
         }
 
         let rt = &self.runtime_mino;
-        let size_i32 = SIZE;
+        let size_i32 = MINO_SIZE;
         let shape_r = (r as i32 - rt.r) as usize;
         let shape_c = (c as i32 - rt.c) as usize;
         if shape_r < size_i32 &&
