@@ -59,6 +59,10 @@ impl RuntimeTetromino {
             _ => unreachable!("{to}"),
         };
     }
+
+    fn get_current_shape(&self) -> &Matrix5x5 {
+        self.mino.get_rotated_shape(self.rotated)
+    }
 }
 
 impl MinoQueue {
