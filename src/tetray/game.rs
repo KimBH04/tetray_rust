@@ -48,16 +48,20 @@ impl RuntimeTetromino {
         self.c += c;
     }
 
-    fn relative_rotation(&mut self, delta: Rotate) {
+    fn set_absolute_rotation(&mut self, rot: Rotate) {
+        self.rotated = rot;
+    }
+
+    fn get_absolute_rotation(&self, relative: Rotate) -> Rotate {
         let from = self.rotated as i32;
-        let to = from + delta as i32 - 1;
-        self.rotated = match to.rem_euclid(4) {
+        let to = from + relative as i32 - 1;
+        match to.rem_euclid(4) {
             0 => Rotate::Left,
             1 => Rotate::Straight,
             2 => Rotate::Right,
             3 => Rotate::Half,
             _ => unreachable!("{to}"),
-        };
+        }
     }
 
     fn get_current_shape(&self) -> &Matrix5x5 {
