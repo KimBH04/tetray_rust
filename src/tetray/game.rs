@@ -110,7 +110,7 @@ impl MinoQueue {
 impl Game {
     pub fn new(seed: usize) -> Self {
         let mut queue = MinoQueue::new(seed);
-        let mino = Tetromino::get_mino(queue.get_next());
+        let mino = MinoKind::get_mino(queue.get_next());
         Self {
             runtime_mino: RuntimeTetromino::new(SPAWN_POINT.0, SPAWN_POINT.1, mino),
             mino_queue: queue,
@@ -128,7 +128,7 @@ impl Game {
             self.runtime_mino = RuntimeTetromino::new(
                 SPAWN_POINT.0,
                 SPAWN_POINT.1,
-                Tetromino::get_mino(self.mino_queue.get_next())
+                MinoKind::get_mino(self.mino_queue.get_next())
             );
         } else {
             rt.move_vertical(1);

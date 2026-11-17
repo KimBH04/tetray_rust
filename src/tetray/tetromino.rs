@@ -139,7 +139,7 @@ impl Matrix5x5 {
 }
 
 impl MinoKind {
-    pub const fn get_color(&self) -> Color {
+    pub const fn get_color(self) -> Color {
         match self {
             MinoKind::None => Color::new(0, 0, 0, 0),
             MinoKind::J => Color::new(60, 120, 255, 255),
@@ -152,7 +152,7 @@ impl MinoKind {
         }
     }
 
-    pub const fn get_mino(&self) -> Tetromino {
+    pub const fn get_mino(self) -> Tetromino {
         match self {
             MinoKind::None => MINO_NONE,
             MinoKind::J => MINO_J,
@@ -196,19 +196,6 @@ impl Tetromino {
                 Matrix5x5 { shape: right },
                 Matrix5x5 { shape: half }
             ]
-        }
-    }
-
-    pub const fn get_mino(kind: MinoKind) -> Tetromino {
-        match kind {
-            MinoKind::None => MINO_NONE,
-            MinoKind::J => MINO_J,
-            MinoKind::L => MINO_L,
-            MinoKind::S => MINO_S,
-            MinoKind::T => MINO_T,
-            MinoKind::Z => MINO_Z,
-            MinoKind::I => MINO_I,
-            MinoKind::O => MINO_O,
         }
     }
 
