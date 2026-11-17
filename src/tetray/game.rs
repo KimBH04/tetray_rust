@@ -1,10 +1,18 @@
 use sola_raylib::color::Color;
 
-use crate::tetray::{bag::{Bag, CASE_COUNT}, board::{BOARD_DEPTH, BOARD_WIDTH, Board}, tetromino::{MinoKind, Rotate, MINO_SIZE, Tetromino}};
+use crate::tetray::{bag::{Bag, CASE_COUNT}, board::{BOARD_DEPTH, BOARD_WIDTH, Board}, rotation::get_kick_positions, tetromino::{MINO_SIZE, Matrix5x5, MinoKind, Rotate, Tetromino}};
 
 const NEXT_PREVIEW_COUNT: usize = 5;
 
 const SPAWN_POINT: (i32, i32) = (18, 2);
+
+pub enum Command {
+    Move { col: i32 },
+    Rotate { rot: Rotate },
+    HardDrop,
+    SoftDrop,
+    Hold,
+}
 
 struct RuntimeTetromino {
     r: i32,
@@ -124,6 +132,82 @@ impl Game {
             mino_queue: queue,
             hold: MinoKind::None,
             board: Board::new(),
+        }
+    }
+
+    pub fn command(&mut self, cmd: Command) -> Result<String, String> {
+        match cmd {
+            Command::Move { col } => {
+                let r = self.runtime_mino.r;
+                let c = self.runtime_mino.c;
+                if self.board.collision(r, c + col, self.runtime_mino.get_current_shape()) {
+                    return Err(format!("Failed to Move to: (r: {r}, c: {c})"))
+                }
+                self.runtime_mino.move_horizontal(col);
+
+                Ok(format!("Successed to Move to: (r: {r}, c: {c})"))
+            },
+            Command::Rotate { rot } => {
+                let rt = &mut self.runtime_mino;
+                let from = rt.rotated;
+                let to = rt.get_absolute_rotation(rot);
+                let shape = rt.mino.get_rotated_shape(to);
+                let positions = get_kick_positions(
+                    rt.mino.get_mino_kind(),
+                    from,
+                    to
+                );
+
+                for (r, c) in positions {
+                    let kick_r = rt.r + r;
+                    let kick_c = rt.c + c;
+                    if self.board.collision(kick_r, kick_c, shape) {
+                        continue;
+                    }
+
+                    rt.r = kick_r;
+                    rt.c = kick_c;
+                    rt.set_absolute_rotation(to);
+
+                    return Ok(format!("Successed to Rotate from: {from} to: {to}"))
+                }
+
+                Err(format!("Failed to Rotate from: {from} to: {to}"))
+            },
+            Command::HardDrop => {
+                let rt = &mut self.runtime_mino;
+                let r = rt.r;
+                let c = rt.c;
+                let mut down = 1;
+                while !self.board.collision(r + down, c, rt.get_current_shape()) {
+                    down += 1;
+                }
+                down -= 1;
+                rt.move_vertical(down);
+                self.pick_mino();
+
+                Ok(format!("Successed to HardDrop"))
+            },
+            Command::SoftDrop => {
+                self.drop_mino();
+
+                Ok(format!("Successed to SoftDrop"))
+            },
+            Command::Hold => {
+                let hold = self.hold;
+                self.hold = self.runtime_mino.mino.get_mino_kind();
+                if hold == MinoKind::None {
+                    self.pick_mino();
+                } else {
+                    self.runtime_mino = RuntimeTetromino::new(
+                        SPAWN_POINT.0,
+                        SPAWN_POINT.1,
+                        hold.get_mino()
+                    );
+                }
+
+                Ok(format!("Successed to Hold"))
+            },
         }
     }
 
