@@ -1,3 +1,5 @@
+use core::fmt;
+
 use sola_raylib::color::Color;
 
 const X: bool = false;
@@ -135,6 +137,19 @@ pub struct Tetromino {
 impl Matrix5x5 {
     pub fn get_cell(&self, r: usize, c: usize) -> bool {
         r < MINO_SIZE && c < MINO_SIZE && self.shape[r][c]
+    }
+}
+
+impl fmt::Display for Rotate {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let s = match self {
+            Rotate::Left => "Left",
+            Rotate::Straight => "Straight",
+            Rotate::Right => "Right",
+            Rotate::Half => "Half",
+        };
+
+        write!(f, "{}", s)
     }
 }
 
