@@ -7,6 +7,14 @@ pub struct Board {
     cells: [[MinoKind; BOARD_WIDTH]; BOARD_DEPTH],
 }
 
+impl Clone for Board {
+    fn clone(&self) -> Self {
+        Self {
+            cells: self.cells,
+        }
+    }
+}
+
 impl Board {
     pub fn new() -> Self {
         Self { cells: [[MinoKind::None; BOARD_WIDTH]; BOARD_DEPTH], }
