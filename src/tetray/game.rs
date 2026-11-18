@@ -118,8 +118,8 @@ impl MinoQueue {
         next
     }
 
-    fn preview_list(&self) -> &[MinoKind; NEXT_PREVIEW_COUNT] {
-        &self.queue
+    fn preview_list(&self) -> [MinoKind; NEXT_PREVIEW_COUNT] {
+        self.queue
     }
 }
 
