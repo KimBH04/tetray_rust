@@ -38,6 +38,12 @@ pub struct Game {
     board: Board,
 }
 
+pub struct GameView {
+    pub board: Board,
+    pub nexts: [MinoKind; NEXT_PREVIEW_COUNT],
+    pub hold: MinoKind,
+}
+
 impl RuntimeTetromino {
     fn new(r: i32, c: i32, mino: Tetromino) -> Self {
         Self {
@@ -253,6 +259,18 @@ impl Game {
             Some(kind.get_color())
         } else {
             None
+        }
+    }
+
+    pub fn view(&self) -> GameView {
+        let mut board = self.board.clone();
+        let rt = &self.runtime_mino;
+        board.place(rt.r, rt.c, rt.get_current_shape(), rt.mino.get_mino_kind());
+
+        GameView {
+            board: board,
+            nexts: self.mino_queue.preview_list(),
+            hold: self.hold,
         }
     }
 }
