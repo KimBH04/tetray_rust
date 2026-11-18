@@ -69,7 +69,7 @@ impl Board {
     pub fn update_board(&mut self) -> usize {
         let mut remove_cnt = 0;
 
-        'line: for line_index in (BOARD_DEPTH - 1)..=0 {
+        'line: for line_index in (0..BOARD_DEPTH).rev() {
             for cell_index in 0..BOARD_WIDTH {
                 if self.cells[line_index][cell_index] == MinoKind::None {
                     self.cells[line_index + remove_cnt] = self.cells[line_index];

@@ -41,8 +41,8 @@ pub fn get_kick_positions(kind: MinoKind, from: Rotate, to: Rotate) -> Vec<(i32,
     let cnt = from_offsets.len();
     for i in 0..cnt {
         positions.push((
+            from_offsets[i].1 - to_offsets[i].1,
             from_offsets[i].0 - to_offsets[i].0,
-            from_offsets[i].1 - to_offsets[i].1
         ));
     }
 

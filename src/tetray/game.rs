@@ -188,9 +188,8 @@ impl Game {
                 while !self.board.collision(r + down, c, rt.get_current_shape()) {
                     down += 1;
                 }
-                down -= 1;
-                rt.move_vertical(down);
-                self.pick_mino();
+                rt.move_vertical(down - 1);
+                self.drop_mino();
 
                 Ok(format!("Successed to HardDrop"))
             },
@@ -226,6 +225,7 @@ impl Game {
         let shape = rt.mino.get_rotated_shape(rt.rotated);
         if self.board.collision(rt.r + 1, rt.c, shape) {
             self.board.place(rt.r, rt.c, shape, rt.mino.get_mino_kind());
+            self.board.update_board();
             self.pick_mino();
         } else {
             rt.move_vertical(1);
