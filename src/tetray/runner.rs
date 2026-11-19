@@ -56,7 +56,12 @@ impl TetrayRunner {
                 
                 match rx.recv_timeout(wait) {
                     Err(RecvTimeoutError::Timeout) => {
-                        game_arc.lock().unwrap().update();
+                        let mut game = game_arc.lock().unwrap();
+                        if game.is_ended() {
+                            break;
+                        }
+
+                        game.update();
                         deadline = Instant::now() + period;
                     },
                     Ok(Msg::HardDrop) | Ok(Msg::SoftDrop) | Ok(Msg::Hold) => {

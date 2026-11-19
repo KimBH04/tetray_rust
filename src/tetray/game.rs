@@ -3,6 +3,7 @@ use crate::tetray::{bag::{Bag, CASE_COUNT}, board::Board, rotation::get_kick_pos
 const NEXT_PREVIEW_COUNT: usize = 5;
 
 const SPAWN_POINT: (i32, i32) = (18, 2);
+const ENDLINE: usize = 19;
 
 pub enum Command {
     Move { col: i32 },
@@ -37,6 +38,7 @@ pub struct Game {
     mino_queue: MinoQueue,
     mino_hold: MinoHold,
     board: Board,
+    game_over: bool,
 }
 
 pub struct GameView {
@@ -148,10 +150,15 @@ impl Game {
             mino_queue: queue,
             mino_hold: MinoHold::new(),
             board: Board::new(),
+            game_over: false,
         }
     }
 
     pub fn command(&mut self, cmd: Command) -> Result<String, String> {
+        if self.game_over {
+            return Err(format!("Was Game Over"))
+        }
+
         match cmd {
             Command::Move { col } => {
                 let r = self.runtime_mino.r;
@@ -233,6 +240,10 @@ impl Game {
     }
 
     pub fn update(&mut self) {
+        if self.game_over {
+            return;
+        }
+
         self.drop_mino();
     }
 
@@ -244,17 +255,24 @@ impl Game {
             self.board.update_board();
             self.pick_mino();
             self.mino_hold.holdable = true;
+            if !self.board.is_empty_line(ENDLINE) {
+                self.game_over = true;
+            }
         } else {
             rt.move_vertical(1);
         }
     }
 
     fn pick_mino(&mut self) {
-        self.runtime_mino = RuntimeTetromino::new(
-            SPAWN_POINT.0,
-            SPAWN_POINT.1,
-            MinoKind::get_mino(self.mino_queue.get_next())
-        );
+        let (mut r, c) = SPAWN_POINT;
+        let kind = self.mino_queue.get_next();
+        let mino = MinoKind::get_mino(kind);
+        let shape = mino.get_rotated_shape(Rotate::Straight);
+        if self.board.collision(r, c, shape) {
+            r -= 1;
+        }
+
+        self.runtime_mino = RuntimeTetromino::new(r, c, mino);
     }
 
     pub fn view(&self) -> GameView {
@@ -267,5 +285,9 @@ impl Game {
             nexts: self.mino_queue.preview_list(),
             hold: self.mino_hold.hold,
         }
+    }
+
+    pub fn is_ended(&self) -> bool {
+        self.game_over
     }
 }

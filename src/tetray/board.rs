@@ -82,4 +82,10 @@ impl Board {
         
         remove_cnt
     }
+
+
+    pub fn is_empty_line(&self, line: usize) -> bool {
+        line >= BOARD_DEPTH || self.cells[line]
+            .iter().all(|&kind| kind == MinoKind::None)
+    }
 }

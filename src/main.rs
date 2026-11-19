@@ -61,6 +61,14 @@ fn draw_board(d: &mut impl RaylibDraw, view: &GameView) {
             d.draw_rectangle_lines(x, y, CELL_SIZE, CELL_SIZE, Color::LIGHTGRAY);
         }
     }
+    // 위에서 두 번째 칸 아래 경계선
+    d.draw_rectangle(
+        BOARD_X,
+        BOARD_Y + 2 * CELL_SIZE - 1,
+        BOARD_WIDTH as i32 * CELL_SIZE,
+        2,
+        Color::RED,
+    );
     d.draw_rectangle_lines(
         BOARD_X - 1,
         BOARD_Y - 1,
