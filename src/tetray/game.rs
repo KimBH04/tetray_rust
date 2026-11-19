@@ -27,12 +27,15 @@ struct MinoQueue {
     add: usize,
 }
 
+struct MinoHold {
+    hold: MinoKind,
+    holdable: bool,
+}
+
 pub struct Game {
     runtime_mino: RuntimeTetromino,
-
     mino_queue: MinoQueue,
-    hold: MinoKind,
-
+    mino_hold: MinoHold,
     board: Board,
 }
 
@@ -127,6 +130,15 @@ impl MinoQueue {
     }
 }
 
+impl MinoHold {
+    fn new() -> Self {
+        Self {
+            hold: MinoKind::None,
+            holdable: true,
+        }
+    }
+}
+
 impl Game {
     pub fn new(seed: usize) -> Self {
         let mut queue = MinoQueue::new(seed);
@@ -134,7 +146,7 @@ impl Game {
         Self {
             runtime_mino: RuntimeTetromino::new(SPAWN_POINT.0, SPAWN_POINT.1, mino),
             mino_queue: queue,
-            hold: MinoKind::None,
+            mino_hold: MinoHold::new(),
             board: Board::new(),
         }
     }
@@ -197,8 +209,12 @@ impl Game {
                 Ok(format!("Successed to SoftDrop"))
             },
             Command::Hold => {
-                let hold = self.hold;
-                self.hold = self.runtime_mino.mino.get_mino_kind();
+                if !self.mino_hold.holdable {
+                    return Err(format!("Failed to Hold"))
+                }
+
+                let hold = self.mino_hold.hold;
+                self.mino_hold.hold = self.runtime_mino.mino.get_mino_kind();
                 if hold == MinoKind::None {
                     self.pick_mino();
                 } else {
@@ -208,6 +224,8 @@ impl Game {
                         hold.get_mino()
                     );
                 }
+
+                self.mino_hold.holdable = false;
 
                 Ok(format!("Successed to Hold"))
             },
@@ -225,6 +243,7 @@ impl Game {
             self.board.place(rt.r, rt.c, shape, rt.mino.get_mino_kind());
             self.board.update_board();
             self.pick_mino();
+            self.mino_hold.holdable = true;
         } else {
             rt.move_vertical(1);
         }
@@ -246,7 +265,7 @@ impl Game {
         GameView {
             board: board,
             nexts: self.mino_queue.preview_list(),
-            hold: self.hold,
+            hold: self.mino_hold.hold,
         }
     }
 }
