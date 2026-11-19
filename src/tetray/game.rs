@@ -1,6 +1,4 @@
-use sola_raylib::color::Color;
-
-use crate::tetray::{bag::{Bag, CASE_COUNT}, board::{BOARD_DEPTH, BOARD_WIDTH, Board}, rotation::get_kick_positions, tetromino::{MINO_SIZE, Matrix5x5, MinoKind, Rotate, Tetromino}};
+use crate::tetray::{bag::{Bag, CASE_COUNT}, board::Board, rotation::get_kick_positions, tetromino::{Matrix5x5, MinoKind, Rotate, Tetromino}};
 
 const NEXT_PREVIEW_COUNT: usize = 5;
 
@@ -238,28 +236,6 @@ impl Game {
             SPAWN_POINT.1,
             MinoKind::get_mino(self.mino_queue.get_next())
         );
-    }
-
-    pub fn get_cell_color(&self, r: usize, c: usize) -> Option<Color> {
-        if r >= BOARD_DEPTH || c >= BOARD_WIDTH {
-            return None
-        }
-
-        let rt = &self.runtime_mino;
-        let size_i32 = MINO_SIZE;
-        let shape_r = (r as i32 - rt.r) as usize;
-        let shape_c = (c as i32 - rt.c) as usize;
-        if shape_r < size_i32 &&
-            shape_c < size_i32 &&
-            rt.mino.get_rotated_shape(rt.rotated).get_cell(shape_r, shape_c) {
-            return Some(rt.mino.get_color())
-        }
-
-        if let Some(kind) = self.board.get_cell(r, c) {
-            Some(kind.get_color())
-        } else {
-            None
-        }
     }
 
     pub fn view(&self) -> GameView {
