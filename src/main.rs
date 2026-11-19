@@ -20,6 +20,12 @@ const HOLD_X: i32 = BOARD_X - PREVIEW_BOX - 40;
 const NEXT_X: i32 = BOARD_X + BOARD_WIDTH as i32 * CELL_SIZE + 40;
 const LABEL_SIZE: i32 = 20;
 
+const SCREEN_W: i32 = 800;
+const SCREEN_H: i32 = 600;
+const GAME_OVER_TEXT: &str = "GAME OVER!";
+const GAME_OVER_SIZE: i32 = 30;
+const GAME_OVER_MARGIN: i32 = 20;
+
 fn handle_input(win: &RaylibHandle, runner: &mut TetrayRunner) {
     if win.is_key_pressed(KeyboardKey::KEY_LEFT) || win.is_key_pressed_repeat(KeyboardKey::KEY_LEFT) {
         runner.try_move(-1);
@@ -112,13 +118,26 @@ fn draw_side_panels(d: &mut impl RaylibDraw, view: &GameView) {
     }
 }
 
+fn draw_game_over(d: &mut impl RaylibDraw, text_width: i32) {
+    let y = SCREEN_H - GAME_OVER_SIZE - GAME_OVER_MARGIN;
+    d.draw_text(GAME_OVER_TEXT, GAME_OVER_MARGIN, y, GAME_OVER_SIZE, Color::RED);
+    d.draw_text(
+        GAME_OVER_TEXT,
+        SCREEN_W - text_width - GAME_OVER_MARGIN,
+        y,
+        GAME_OVER_SIZE,
+        Color::RED,
+    );
+}
+
 fn main() {
     let (mut win, thread) = sola_raylib::init()
-        .size(800, 600)
+        .size(SCREEN_W, SCREEN_H)
         .title("Tetray")
         .build();
 
     win.set_target_fps(60);
+    let game_over_width = win.measure_text(GAME_OVER_TEXT, GAME_OVER_SIZE);
 
     let mut runner = TetrayRunner::new();
     runner.run();
@@ -132,6 +151,9 @@ fn main() {
         d.clear_background(Color::RAYWHITE);
         draw_board(&mut d, &view);
         draw_side_panels(&mut d, &view);
+        if view.ended {
+            draw_game_over(&mut d, game_over_width);
+        }
     }
 
     runner.stop();

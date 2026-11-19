@@ -45,6 +45,7 @@ pub struct GameView {
     pub board: Board,
     pub nexts: [MinoKind; NEXT_PREVIEW_COUNT],
     pub hold: MinoKind,
+    pub ended: bool,
 }
 
 impl RuntimeTetromino {
@@ -284,6 +285,7 @@ impl Game {
             board: board,
             nexts: self.mino_queue.preview_list(),
             hold: self.mino_hold.hold,
+            ended: self.game_over,
         }
     }
 
