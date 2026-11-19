@@ -1,4 +1,4 @@
-use std::{sync::{Arc, Mutex, mpsc::{RecvTimeoutError, Sender, channel}}, thread::{self, JoinHandle}, time::{Duration, Instant, SystemTime, UNIX_EPOCH}};
+use std::{sync::{Arc, Mutex, atomic::{AtomicBool, Ordering}, mpsc::{RecvTimeoutError, Sender, channel}}, thread::{self, JoinHandle}, time::{Duration, Instant, SystemTime, UNIX_EPOCH}};
 
 use crate::tetray::{game::{Command, Game, GameView}, tetromino::Rotate};
 
@@ -9,6 +9,7 @@ pub struct TetrayRunner {
     game: Arc<Mutex<Game>>,
     sender_opt: Option<Sender<Msg>>,
     handle_opt: Option<JoinHandle<()>>,
+    running: Arc<AtomicBool>,
 }
 
 impl Drop for TetrayRunner {
@@ -30,15 +31,21 @@ impl TetrayRunner {
         Self {
             game: Arc::new(Mutex::new(Game::new(seed))),
             handle_opt: None,
-            sender_opt: None
+            sender_opt: None,
+            running: Arc::new(AtomicBool::new(false)),
         }
     }
 
     pub fn run(&mut self) {
+        if self.running.load(Ordering::SeqCst) {
+            return;
+        }
+        
         let (tx, rx) = channel::<Msg>();
         self.sender_opt = Some(tx);
 
         let game_arc = Arc::clone(&self.game);
+        let running_arc = Arc::clone(&self.running);
 
         let thread = thread::spawn(move || {
             let period = Duration::from_secs(1);
@@ -56,6 +63,7 @@ impl TetrayRunner {
                         deadline = Instant::now() + period;
                     },
                     Ok(Msg::Quit) | Err(RecvTimeoutError::Disconnected) => {
+                        running_arc.store(false, Ordering::SeqCst);
                         break;
                     },
                 }
@@ -63,6 +71,7 @@ impl TetrayRunner {
         });
 
         self.handle_opt = Some(thread);
+        self.running.store(true, Ordering::SeqCst);
     }
 
     pub fn stop(&mut self) {
@@ -75,16 +84,28 @@ impl TetrayRunner {
     }
 
     pub fn try_move(&mut self, column: i32) {
+        if !self.running.load(Ordering::SeqCst) {
+            return;
+        }
+
         let mut game = self.game.lock().unwrap();
         _ = game.command(Command::Move { col: column });
     }
 
     pub fn try_relative_rotation(&mut self, delta: Rotate) {
+        if !self.running.load(Ordering::SeqCst) {
+            return;
+        }
+
         let mut game = self.game.lock().unwrap();
         _ = game.command(Command::Rotate { rot: delta });
     }
 
     pub fn hard_drop(&mut self) {
+        if !self.running.load(Ordering::SeqCst) {
+            return;
+        }
+
         let mut game = self.game.lock().unwrap();
         _ = game.command(Command::HardDrop);
         
@@ -94,6 +115,10 @@ impl TetrayRunner {
     }
 
     pub fn soft_drop(&mut self) {
+        if !self.running.load(Ordering::SeqCst) {
+            return;
+        }
+
         let mut game = self.game.lock().unwrap();
         _ = game.command(Command::SoftDrop);
 
@@ -103,6 +128,10 @@ impl TetrayRunner {
     }
 
     pub fn hold(&mut self) {
+        if !self.running.load(Ordering::SeqCst) {
+            return;
+        }
+
         let mut game = self.game.lock().unwrap();
         _ = game.command(Command::Hold);
 
