@@ -81,7 +81,7 @@ impl TetrayRunner {
 
     pub fn stop(&mut self) {
         if let Some(s) = self.sender_opt.take() {
-            s.clone().send(Msg::Quit).unwrap();
+            _ = s.clone().send(Msg::Quit);
         }
         if let Some(h) = self.handle_opt.take() {
             h.join().unwrap();
