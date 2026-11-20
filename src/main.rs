@@ -147,7 +147,6 @@ fn main() {
         .title("Tetray")
         .build();
 
-    win.set_target_fps(60);
     let game_over_width = win.measure_text(GAME_OVER_TEXT, GAME_OVER_SIZE);
 
     let mut runner = TetrayRunner::new();
@@ -162,6 +161,7 @@ fn main() {
         d.clear_background(Color::RAYWHITE);
         draw_board(&mut d, &view);
         draw_side_panels(&mut d, &view);
+        d.draw_fps(10, 10);
         if view.ended {
             draw_game_over(&mut d, game_over_width);
         }
