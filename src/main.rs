@@ -19,6 +19,8 @@ const PREVIEW_BOX: i32 = PREVIEW_CELL * MINO_SIZE as i32;
 const HOLD_X: i32 = BOARD_X - PREVIEW_BOX - 40;
 const NEXT_X: i32 = BOARD_X + BOARD_WIDTH as i32 * CELL_SIZE + 40;
 const LABEL_SIZE: i32 = 20;
+// 점수 패널 x 좌표 (HIGH SCORE 문구가 보드와 겹치지 않도록 왼쪽 여백 확보)
+const SCORE_X: i32 = 30;
 
 const SCREEN_W: i32 = 800;
 const SCREEN_H: i32 = 600;
@@ -110,6 +112,15 @@ fn draw_mino_preview(d: &mut impl RaylibDraw, kind: MinoKind, x: i32, y: i32) {
 fn draw_side_panels(d: &mut impl RaylibDraw, view: &GameView) {
     d.draw_text("HOLD", HOLD_X, BOARD_Y, LABEL_SIZE, Color::DARKGRAY);
     draw_mino_preview(d, view.hold, HOLD_X, BOARD_Y + LABEL_SIZE + 8);
+
+    // 홀드 박스 아래에 점수, 최고 점수 순서로 표시
+    let score_y = BOARD_Y + LABEL_SIZE + 8 + PREVIEW_BOX + 30;
+    d.draw_text("SCORE", SCORE_X, score_y, LABEL_SIZE, Color::DARKGRAY);
+    d.draw_text(&view.score.to_string(), SCORE_X, score_y + LABEL_SIZE + 4, LABEL_SIZE, Color::BLACK);
+
+    let high_y = score_y + (LABEL_SIZE + 4) * 2 + 16;
+    d.draw_text("HIGH SCORE", SCORE_X, high_y, LABEL_SIZE, Color::DARKGRAY);
+    d.draw_text(&view.highscore.to_string(), SCORE_X, high_y + LABEL_SIZE + 4, LABEL_SIZE, Color::BLACK);
 
     d.draw_text("NEXT", NEXT_X, BOARD_Y, LABEL_SIZE, Color::DARKGRAY);
     for (i, kind) in view.nexts.iter().enumerate() {

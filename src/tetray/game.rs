@@ -1,4 +1,4 @@
-use crate::tetray::{bag::{Bag, CASE_COUNT}, board::Board, rotation::get_kick_positions, tetromino::{Matrix5x5, MinoKind, Rotate, Tetromino}};
+use crate::tetray::{bag::{Bag, CASE_COUNT}, board::Board, rotation::get_kick_positions, score::Score, tetromino::{Matrix5x5, MinoKind, Rotate, Tetromino}};
 
 const NEXT_PREVIEW_COUNT: usize = 5;
 
@@ -38,6 +38,7 @@ pub struct Game {
     mino_queue: MinoQueue,
     mino_hold: MinoHold,
     board: Board,
+    score: Score,
     game_over: bool,
 }
 
@@ -45,6 +46,8 @@ pub struct GameView {
     pub board: Board,
     pub nexts: [MinoKind; NEXT_PREVIEW_COUNT],
     pub hold: MinoKind,
+    pub score: usize,
+    pub highscore: usize,
     pub ended: bool,
 }
 
@@ -151,6 +154,7 @@ impl Game {
             mino_queue: queue,
             mino_hold: MinoHold::new(),
             board: Board::new(),
+            score: Score::new(),
             game_over: false,
         }
     }
@@ -253,7 +257,10 @@ impl Game {
         let shape = rt.mino.get_rotated_shape(rt.rotated);
         if self.board.collision(rt.r + 1, rt.c, shape) {
             self.board.place(rt.r, rt.c, shape, rt.mino.get_mino_kind());
-            self.board.update_board();
+
+            let x = self.board.update_board();
+            self.score.add_score((x + (1 << x >> 2)) * 100);
+
             self.pick_mino();
             self.mino_hold.holdable = true;
             if !self.board.is_empty_line(ENDLINE) {
@@ -285,6 +292,8 @@ impl Game {
             board: board,
             nexts: self.mino_queue.preview_list(),
             hold: self.mino_hold.hold,
+            score: self.score.get_score(),
+            highscore: self.score.get_highscore(),
             ended: self.game_over,
         }
     }
